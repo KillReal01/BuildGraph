@@ -25,7 +25,7 @@ private slots:
 
 private:
     Ui::DirectWindow *ui;
-    QString currpath = "C://";
+    QString currpath = "C:/";
 
 protected:
     void paintEvent(QPaintEvent *event);
