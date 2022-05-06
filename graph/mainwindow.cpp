@@ -3,7 +3,6 @@
 #include "directwindow.h"
 #include <iostream>
 
-std::map<double, double> points;//массив точек
 const int N = 100;//100 случайных точек
 
 MainWindow::MainWindow(QWidget *parent)
@@ -61,18 +60,25 @@ void MainWindow::on_radioButton_file_clicked()
 //Кнопка построить график
 void MainWindow::on_pushButton_buildgraph_clicked()
 {
-    points.clear();//чистим массив точек
+    QVector<QPointF> points;
     if (ui->radioButton_rand->isChecked()){
         double x, y;
+        int h = ui->widget->geometry().height();
+        int w = ui->widget->geometry().width();
         for (int i = 0; i < N; i++){
-            x = rand() % 200 - 100;
-            y = rand() % 200 - 100;
-            points.insert({x, y});
+            x = rand() % w - w/2;
+            y = rand() % h - h/2;
+            points.push_back(QPointF(x, y));
         }
     }
     if (ui->radioButton_file->isChecked()){
         readFile(filename.toStdString(), points);
     }
+
+    //Цвет
+    QColor color = ui->widget_color->palette().window().color();
+    vecColor.push_back(color);
+    vecGraph.push_back(points);
 
     update();
 }
@@ -86,10 +92,12 @@ void MainWindow::paintEvent(QPaintEvent *)
     int window_h = ui->widget->geometry().height();
 
     int center_x = window_x + window_w / 2;
-    int center_y = window_y  +window_h / 2;
+    int center_y = window_y  + window_h / 2;
 
     QPainter painter;
     painter.begin(this);
+
+    painter.setBrush(Qt::white);
     painter.drawRect(window_x, window_y, window_w, window_h);
 
     painter.translate(center_x, center_y);
@@ -107,17 +115,16 @@ void MainWindow::paintEvent(QPaintEvent *)
     }
 
     //График
-    painter.setPen(ui->widget_color->palette().window().color());
-    QPainterPath path;
-    path.moveTo(points.begin()->first, points.begin()->second);
-    for (auto &i : points){
-         path.lineTo(i.first, i.second);
+    for (int j = 0; j < std::size(vecGraph); j++)
+    {
+        for (int i = 0; i < std::size(vecGraph[j].arr_points) - 1; i++)
+        {
+            QLineF line(vecGraph[j].arr_points[i].x(), -vecGraph[j].arr_points[i].y(), vecGraph[j].arr_points[i+1].x(), -vecGraph[j].arr_points[i+1].y() );
+            painter.setPen(vecColor[j]);
+            painter.drawLine(line);
+        }
     }
-
-    painter.drawPath(path);
-
     painter.end();
-
 }
 
 //Кнопка выбора файла
@@ -129,7 +136,7 @@ void MainWindow::on_pushButton_select_file_clicked()
     filename = dialog.sendTitle();
 }
 
-bool MainWindow::readFile(std::string filename, std::map<double, double>& points){
+bool MainWindow::readFile(std::string filename,  QVector<QPointF>& points){
     std::ifstream file;
     file.open(filename);
     if (!file.is_open()) {
@@ -142,7 +149,7 @@ bool MainWindow::readFile(std::string filename, std::map<double, double>& points
         while (!file.eof())
         {
             file >> x >> y;
-            points.insert({x, -y});//то что выше оси ох < 0
+            points.push_back(QPoint(x, -y));//то что выше оси ох < 0
         }
         file.close();
         return true;
@@ -152,4 +159,12 @@ bool MainWindow::readFile(std::string filename, std::map<double, double>& points
 
 
 
+
+
+void MainWindow::on_pushButton_delete_clicked()
+{
+    vecColor.clear();
+    vecGraph.clear();
+    update();
+}
 

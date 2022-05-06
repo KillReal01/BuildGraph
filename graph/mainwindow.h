@@ -4,10 +4,12 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QPainter>
-#include <QPainterPath>
 #include <fstream>
 #include <map>
 #include <time.h>
+#include <QVector>
+#include <QPointF>
+#include "mygraph.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -35,15 +37,44 @@ private slots:
 
     void on_pushButton_select_file_clicked();
 
-    bool readFile(std::string filename, std::map<double, double>& points);
+    bool readFile(std::string filename,  QVector<QPointF>& points);
+
+    void on_pushButton_delete_clicked();
 
 protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
     Ui::MainWindow *ui;
-    QString filename = "";
-    QPainterPath path;
+
+    //Название выбранного файла
+    QString filename;
+
+    //Размеры активного окна
+    float myWidth;
+    float myHeight;
+
+    //Глобальное расположение мыши
+    QPoint mousePos;
+
+    //Пересечиние графика и мышки
+    bool collision = false;
+
+    //Отсут от groupBox, выставляется в коде!
+    float punding_x_left = 0;
+
+    //Локальные координаты мыши
+    float mouseX;
+    float mouseY;
+
+    //Точка пересечения графика и мышки
+    QPointF ans_point;
+
+    //Массив графиков
+    QVector<MyGraph> vecGraph;
+
+    //Цвета
+    std::vector<QColor> vecColor;
 };
 #endif // MAINWINDOW_H
 

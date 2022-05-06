@@ -11,11 +11,13 @@ CONFIG += c++17
 SOURCES += \
     directwindow.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    mygraph.cpp
 
 HEADERS += \
     directwindow.h \
-    mainwindow.h
+    mainwindow.h \
+    mygraph.h
 
 FORMS += \
     directwindow.ui \
