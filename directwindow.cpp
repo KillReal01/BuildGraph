@@ -2,6 +2,7 @@
 #include "ui_directwindow.h"
 #include <QDir>
 #include <QFileInfo>
+#include <QMessageBox>
 
 DirectWindow::DirectWindow(QWidget *parent) :
     QDialog(parent),
@@ -53,6 +54,7 @@ void DirectWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
     {
         this->currpath = this->currpath + "/" + item->text();
         this->close();
+        QMessageBox::information(this, "Message", "File read succesful!", QMessageBox::Ok);
     }
     else
     {
