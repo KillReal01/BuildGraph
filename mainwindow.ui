@@ -17,9 +17,9 @@
    <widget class="QLabel" name="axisY">
     <property name="geometry">
      <rect>
-      <x>630</x>
+      <x>680</x>
       <y>30</y>
-      <width>151</width>
+      <width>141</width>
       <height>31</height>
      </rect>
     </property>
@@ -36,9 +36,9 @@
    <widget class="QLabel" name="axisX">
     <property name="geometry">
      <rect>
-      <x>1056</x>
-      <y>290</y>
-      <width>81</width>
+      <x>1120</x>
+      <y>270</y>
+      <width>31</width>
       <height>20</height>
      </rect>
     </property>
@@ -309,7 +309,7 @@
      <x>0</x>
      <y>0</y>
      <width>1157</width>
-     <height>22</height>
+     <height>17</height>
     </rect>
    </property>
   </widget>
