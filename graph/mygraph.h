@@ -4,13 +4,15 @@
 #include <QPointF>
 #include <QLineF>
 #include <QDebug>
-
+#include <Qt>
+#include <QColor>
 
 class MyGraph
 {
 public:
     // Конструктор класса принимает точки для представления графика
-    MyGraph(QVector<QPointF> vec);
+    //MyGraph(QVector<QPointF> vec, Qt::GlobalColor color);
+    MyGraph(QVector<QPointF> vec, QString name, QColor color);
 
     // Массив точек
     QVector<QPointF> arr_points;
@@ -24,6 +26,9 @@ public:
     float get_minX();
     float get_maxY();
     float get_minY();
+
+    QColor colorGraph;
+    QString nameGraph;
 
 private:
     // Максимальные и минимальные точки графика, чтобы вписать в прямоугольник для скролла

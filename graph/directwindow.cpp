@@ -43,7 +43,7 @@ void DirectWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
     {
         if (this->currpath.length() != 2)
         {
-            int index = this->currpath.lastIndexOf("\\");
+            int index = this->currpath.lastIndexOf("/");
             this->currpath = this->currpath.remove(index, this->currpath.length() - index);
             ShowCont(this->currpath);
         }
@@ -51,12 +51,12 @@ void DirectWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
     }
     else if (item->text().right(4) == (QString)".txt")
     {
-        this->currpath = this->currpath + "\\" + item->text();
+        this->currpath = this->currpath + "/" + item->text();
         this->close();
     }
     else
     {
-        this->currpath = this->currpath + "\\" + item->text();
+        this->currpath = this->currpath + "/" + item->text();
         ShowCont(this->currpath);
     }
     repaint();

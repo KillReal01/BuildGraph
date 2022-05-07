@@ -7,10 +7,17 @@ bool comp(const QPointF a, const QPointF b)
 }
 
 
-MyGraph::MyGraph(QVector<QPointF> vec)
+MyGraph::MyGraph(QVector<QPointF> vec, QString name, QColor color)
 {
     //Получаем точки графика и сортируем по X
     arr_points = vec;
+
+    //Цвет графика
+    this->colorGraph = color;
+
+    //Название графика
+    this->nameGraph = name;
+
     std::sort(arr_points.begin(), arr_points.end(), comp);
 
     //Находим крайние точки графика, чтобы представить прямоугольник
