@@ -1,34 +1,21 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "directwindow.h"
-#include <iostream>
-
-const int N = 100;//100 случайных точек
+#include "ui_mainwindow.h"
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->widget_color->setStyleSheet(QString("background-color: rgb(0, 0, 0);"));
-
     ui->horizontalSlider->setMaximum(9); //+1 тк 0
     ui->horizontalSlider->setMinimum(-10);
     ui->horizontalSlider->setValue(0);
 
-    //Координаты окна (виджета)
-    windowX = ui->widget->geometry().x();
-    windowY = ui->widget->geometry().y();
-
-    myWidth = ui->widget->geometry().width();
-    myHeight = ui->widget->geometry().height();
-
-    centerX = windowX + myWidth / 2;
-    centerY = windowY  + myHeight / 2;
-
-    //Инициализация области рисования
-    srand (time(NULL));
-    update();
+    //
+    setWindowTitle("Построение графиков");
+    ui->widget->setStyleSheet(QString("background-color: rgb(0, 0, 0);"));
+    ui->pushButton->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -36,38 +23,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-//Слайдер для выбора цвета
-void MainWindow::on_horizontalSlider_choose_color_sliderMoved(int pos)
-{
-    union color {
-        int integer;
-        unsigned char byte[3];
-    };
-    color n;
-    n.integer = pos;
-    int r = n.byte[2], g = n.byte[1], b = n.byte[0];
-    ui->widget_color->setStyleSheet(QString("background-color: rgb(%1, %2, %3);").arg(r).arg(g).arg(b));
-}
 
-//Кнопка переименовать оси
-void MainWindow::on_pushButton_axis_clicked()
-{
-    update();
-}
-
-//Выбор случайных величин, в качестве данных
-void MainWindow::on_radioButton_rand_clicked()
-{
-    ui->pushButton_select_file->setEnabled(false);
-    ui->pushButton_buildgraph->setEnabled(true);
-}
-
-//Выбор файла, в качестве данных
-void MainWindow::on_radioButton_file_clicked()
-{
-    ui->pushButton_select_file->setEnabled(true);
-    ui->pushButton_buildgraph->setEnabled(true);
-}
 
 void MainWindow::change_horizontalScrollBar()
 {
@@ -88,13 +44,14 @@ void MainWindow::change_horizontalScrollBar()
 
     //Растягиваем скролл
     if (minX  + myWidth / 2 < 0)
-        ui->horizontalScrollBar->setMinimum(minX + myWidth / 2);
+        ui->horizontalScrollBar->setMinimum(minX  + myWidth / 2);
     else
         ui->horizontalScrollBar->setMinimum(0);
     if (maxX - myWidth / 2 > 0)
         ui->horizontalScrollBar->setMaximum((maxX - myWidth / 2));
     else
         ui->horizontalScrollBar->setMaximum(0);
+
 
     //Прячем или показываем
     if (maxX > myWidth / 2 || minX < myWidth / -2)
@@ -107,6 +64,9 @@ void MainWindow::change_horizontalScrollBar()
 
     //qDebug() << ui->horizontalScrollBar->minimum() << "  |  " << ui->horizontalScrollBar->maximum();
 }
+
+
+
 
 void MainWindow::change_verticalScrollBar()
 {
@@ -125,15 +85,18 @@ void MainWindow::change_verticalScrollBar()
     minY -= 150;
     maxY += 100;
 
+
     //Растягиваем скролл
     if (minY  + myHeight / 2 < 0)
-        ui->verticalScrollBar->setMaximum(-(minY + myHeight / 2));
+        ui->verticalScrollBar->setMaximum(-(minY  + myHeight / 2));
     else
         ui->verticalScrollBar->setMaximum(0);
     if (maxY - myHeight / 2 > 0)
         ui->verticalScrollBar->setMinimum(-(maxY - myHeight / 2));
     else
         ui->verticalScrollBar->setMinimum(0);
+
+
 
     //Прячем или показываем
     if (maxY > myHeight / 2 || minY < myHeight / -2)
@@ -147,41 +110,18 @@ void MainWindow::change_verticalScrollBar()
     //qDebug() << ui->verticalScrollBar->minimum() << "  |  " << ui->verticalScrollBar->maximum();
 }
 
-//Кнопка построить график
-void MainWindow::on_pushButton_buildgraph_clicked()
-{
-    QVector<QPointF> points;
-    if (ui->radioButton_rand->isChecked()){
-        double x, y;
-        int h = ui->widget->geometry().height();
-        int w = ui->widget->geometry().width();
-        for (int i = 0; i < N; i++){
-            x = rand() % w - w/2;
-            y = rand() % h - h/2;
-            points.push_back(QPointF(x, y));
-        }
-    }
-    if (ui->radioButton_file->isChecked()){
-        readFile(filename.toStdString(), points);
-    }
 
-    //Заполнение вектора графиков
-    QColor color = ui->widget_color->palette().window().color();
-    MyGraph graph(points, ui->line_edit_graph_name->text(), color);
-    vecGraph.push_back(graph);
 
-    update();
-}
 
 //Событие: Нажатие кнопки мыши
-void MainWindow::mousePressEvent(QMouseEvent *)
+void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     //Глобальные координаты мыши
     mousePos = this->mapFromGlobal(QCursor::pos());
 
     //Локальные координаты мыши
-    mouseX = mousePos.x() / zoom - (myWidth/2 + windowX / zoom + scrool_x / zoom);
-    mouseY = (-mousePos.y() / zoom + myHeight/2 + windowY / zoom + scrool_y / zoom);
+    mouseX = mousePos.x() / zoom - (myWidth/2 + punding_x_left / zoom + scrool_x / zoom);
+    mouseY = (-mousePos.y() / zoom + myHeight/2 + scrool_y / zoom);
 
     //Проверка пересечний мышки с графиком
     for (int i = 0; i < std::size(vecGraph); i++)
@@ -194,45 +134,61 @@ void MainWindow::mousePressEvent(QMouseEvent *)
     QString mousePosToStr = QString("Выбранная точка (x=%1, y=%2)").arg(ans_point.x()).arg(ans_point.y());
     if (collision)
     {
+        //Вывод ответа в statusBar
         ui->statusbar->showMessage(mousePosToStr);
+        //Рисуем точку
         repaint();
     }
 
-    ui->statusbar->showMessage(QString::number(mouseX) + " " + QString::number(mouseY));
+
 }
 
-void MainWindow::paintEvent(QPaintEvent *)
+
+
+//Событие: Перерисовка (При изменении окна + специальный вызвов repaint)
+void MainWindow::paintEvent(QPaintEvent *event)
 {
-    QPainter painter;
-    painter.begin(this);
+    //Отрисовщик
+    QPainter painter(this);
 
-    //Контур
-    painter.setPen(Qt::black);
-    painter.setBrush(Qt::white);
-    painter.drawRect(centerX - myWidth/2, centerY - myHeight/2, myWidth, myHeight);
+    //Отсутуп от groupBox (левый)
+    punding_x_left = ui->groupBox->width();
+    punding_x_right = ui->groupBox_right->width();
 
-    painter.translate(centerX, centerY);
+    punding_x = punding_x_left - punding_x_right;
+
+    //Центр холста
+    float centreW = ((width() + punding_x) / 2);
+    float centreH = (height() / 2);
+
+    //Размеры холста
+    myWidth = (width() - (punding_x_left + punding_x_right)) / zoom;
+    myHeight = height() / zoom;
+
+    //Перемещаем точку центра холста
+    painter.translate(centreW, centreH);
 
     //Обновление sroll
     change_horizontalScrollBar();
     change_verticalScrollBar();
 
-    //Оси
-    painter.drawLine(-myWidth/2, scrool_y, myWidth/2, scrool_y);
-    painter.drawLine(scrool_x, myHeight/2, scrool_x, -myHeight/2);
+    //Отрисвка осей
+    painter.setPen(Qt::black);
+    painter.drawLine(
+                     (myWidth/-2 * zoom),
+                     (0 * zoom + scrool_y),
+                     (myWidth/2 * zoom ),
+                     (0 * zoom + scrool_y)
+                     );
 
-    //деления
-    /*
-    int delta = 10;
-    int size = 2;
-    for (int i = 0; i < myWidth/delta; i++){
-        painter.drawLine(-myWidth/2 * zoom + delta * i, scrool_y - size, -myWidth/2 * zoom + delta * i, scrool_y + size);
-    }
-    for (int i = 0; i < myHeight/delta; i++){
-        painter.drawLine(scrool_x - size, -myHeight/2 * zoom + delta * i, scrool_x + size, -myHeight/2 * zoom + delta * i);
-    }
-    */
+    painter.drawLine(
+                    (0 * zoom + scrool_x),
+                    (-myHeight * zoom),
+                    (0 * zoom + scrool_x),
+                    (myHeight * zoom)
+                    );
 
+    painter.setPen(Qt::blue);
     //Отрисовка графиков
     for (int j = 0; j < std::size(vecGraph); j++)
     {
@@ -247,9 +203,12 @@ void MainWindow::paintEvent(QPaintEvent *)
 
             QPen myPen(vecGraph[j].colorGraph, 2, Qt::SolidLine, Qt::SquareCap);
             painter.setPen(myPen);
-            painter.drawLine(line);
+            //Рисуем выбранные графики
+            if (vecGraph[j].show)
+                painter.drawLine(line);
         }
     }
+
 
     //Отрисовка точки касания
     painter.setPen(Qt::red);
@@ -259,19 +218,38 @@ void MainWindow::paintEvent(QPaintEvent *)
         painter.drawEllipse((ans_point.x() * zoom + scrool_x) - 3, (-ans_point.y() * zoom + scrool_y) - 3, 6, 6);
     }
 
+
     //Подпись осей
-    QPen myPen(Qt::black, 5, Qt::SolidLine, Qt::SquareCap);
+    QPen myPen(Qt::black, 1, Qt::SolidLine, Qt::SquareCap);
     painter.setPen(myPen);
 
     QFont font = painter.font();
     font.setBold(QFont::Bold);
     painter.setFont(font);
 
-    painter.drawText(QPoint(myWidth/2 - ui->line_edit_axisX->text().size() * 5.75 - 25, -5 + scrool_y), ui->line_edit_axisX->text());
-    painter.drawText(QPoint(5 + scrool_x, -myHeight / 2 + 25), ui->line_edit_axisY->text());
+    painter.drawText(QPoint((myWidth*zoom/2) - frame_size - (std::size(titleAxisX) * 5.75) - 40, -5 + scrool_y), titleAxisX);
+    painter.drawText(QPoint(5 + scrool_x,(-myHeight*zoom/2) + 25 + frame_size), titleAxisY);
+    //painter.drawText(point, "Y");
 
-    painter.end();
+
+    //Создание рамки
+    painter.setPen(Qt::white);
+    painter.setBrush(QBrush(Qt::white, Qt::SolidPattern));
+    //painter.drawRect(-myWidth/2 - punding_x_left, myHeight/2, width(), myHeight/2);
+
+    painter.drawRect(-zoom*myWidth/2, -zoom*myHeight/2 , width(), frame_size);
+    painter.drawRect(-zoom*myWidth/2, zoom*myHeight/2 - frame_size -30, width(), frame_size + 30);
+    painter.drawRect(-zoom*myWidth/2, -zoom*myHeight/2, frame_size, height());
+    painter.drawRect(zoom*myWidth/2 - frame_size - 25, -zoom*myHeight/2, frame_size + 25, height());
+
+
+    painter.setPen(Qt::black);
+    painter.setBrush(QBrush(Qt::NoBrush));
+    painter.drawRect(-zoom*myWidth/2 + frame_size, -zoom*myHeight/2 + frame_size, zoom*myWidth - frame_size*2 - 25, zoom*myHeight - frame_size*2 - 30);
+    //painter.drawRect(0, 0, 100, 100);
+
 }
+
 
 void MainWindow::on_horizontalScrollBar_valueChanged(int value)
 {
@@ -296,6 +274,7 @@ void MainWindow::on_horizontalScrollBar_sliderReleased()
 
 void MainWindow::on_verticalScrollBar_valueChanged(int value)
 {
+    //qDebug() << value;
     scrool_y = -value * zoom; //&вниз?
     if (scrool_y_active)
         repaint();
@@ -329,13 +308,34 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
     repaint();
 }
 
-//Кнопка выбора файла
-void MainWindow::on_pushButton_select_file_clicked()
+//
+
+void MainWindow::on_pushButton_clicked()
 {
     DirectWindow dialog;
     dialog.setModal(true);
     dialog.exec();
     filename = dialog.sendTitle();
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    if (ui->lineEdit_2->text() != "") titleAxisX = ui->lineEdit_2->text();
+    if (ui->lineEdit_3->text() != "") titleAxisY = ui->lineEdit_3->text();
+    repaint();
+}
+
+
+void MainWindow::on_horizontalSlider_2_sliderMoved(int position)
+{
+    union color {
+        int integer;
+        unsigned char byte[3];
+    };
+    color n;
+    n.integer = position;
+    int r = n.byte[2], g = n.byte[1], b = n.byte[0];
+    ui->widget->setStyleSheet(QString("background-color: rgb(%1, %2, %3);").arg(r).arg(g).arg(b));
 }
 
 bool MainWindow::readFile(std::string filename,  QVector<QPointF>& points){
@@ -358,10 +358,136 @@ bool MainWindow::readFile(std::string filename,  QVector<QPointF>& points){
     }
 }
 
-void MainWindow::on_pushButton_delete_clicked()
+// кнопка построение графика
+void MainWindow::on_pushButton_2_clicked()
 {
-    vecGraph.clear();
-    collision = false;
+    QVector<QPointF> temp;
+
+    if (ui->radioButton->isChecked()) {
+        double x, y;
+        const int N = 100;
+        int h = ui->centralwidget->geometry().height();
+        int w = ui->centralwidget->geometry().width();
+        for (int i = 0; i < N; i++) {
+            x = rand() % w - w/2;
+            y = rand() % h - h/2;
+            temp.push_back(QPointF(x, y));
+        }
+    }
+
+    if (ui->radioButton_2->isChecked()) {
+        readFile(filename.toStdString(), temp);
+    }
+
+    for (auto &i : temp) qDebug() << i.x() << " " << i.y();
+
+    //цвет
+    QColor color = ui->widget->palette().window().color();
+    //имя
+    QString name = ui->lineEdit->text();
+
+    //Валидность имени
+    if (name == "")
+        QMessageBox::warning(this, "Ошибка", "Имя графика не введено!", QMessageBox::Ok);
+    else{
+        //Проверка на существующее имя
+        bool repeat = false;
+        for (auto &i : vecGraph){
+            if (i.nameGraph == name)
+                repeat = true;
+        }
+        if (!repeat){
+            QListWidgetItem* item = new QListWidgetItem;
+
+            item->setText(name);
+            item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+            item->setCheckState(Qt::Checked); // AND initialize check state
+
+            //Цвет графика
+            QPixmap pixmap (50, 50);
+            pixmap.fill(color);
+            QIcon icon;
+            icon.addPixmap(pixmap, QIcon::Normal, QIcon::On);
+            item->setIcon(icon);
+
+            ui->listWidget->addItem(item);
+
+            MyGraph tempgr(temp, name, color);
+            vecGraph.push_back(tempgr);
+        }
+        else{
+            QMessageBox::warning(this, "Ошибка", "Такое имя уже используется!\nВыберите другое название для графика.", QMessageBox::Ok);
+        }
+    }
+
     update();
+}
+
+void MainWindow::on_pushButton_4_clicked() // кнопка удаление графика
+{
+    if (vecGraph.size() != 0) {
+        vecGraph.clear();
+        collision = false;
+        ui->listWidget->clear();
+        update();
+    }
+    else {
+        QMessageBox::warning(this, "Ошибка", "Нет нарисованных графиков!", QMessageBox::Ok);
+    }
+}
+
+
+void MainWindow::on_radioButton_clicked() // выбрали рандомный график
+{
+    ui->pushButton->setEnabled(false);
+}
+
+
+void MainWindow::on_radioButton_2_clicked()
+{
+    ui->pushButton->setEnabled(true);
+}
+
+//Hide/show график
+void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
+{
+    if (item->checkState() == Qt::Checked){
+        //Активация графика
+        for (auto &i : vecGraph){
+            if (i.nameGraph == item->text())
+                i.show = true;
+        }
+    }
+    if (item->checkState() == Qt::Unchecked){
+        //Деактивация графика
+        for (auto &i : vecGraph){
+            if (i.nameGraph == item->text())
+                i.show = false;
+        }
+    }
+    update();
+}
+
+//Меняем цвет графика
+void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
+{
+    Dialog dialog;
+    dialog.setModal(true);
+    dialog.exec();
+    QColor newColor = dialog.sendColor();
+
+    //Меняем цвет графика
+    for (auto &i : vecGraph){
+        if (i.nameGraph == item->text()){
+            i.colorGraph = newColor;
+        }
+    }
+
+    //Меняем цвет иконки
+    QPixmap pixmap (50, 50);
+    pixmap.fill(newColor);
+    QIcon icon;
+    icon.addPixmap(pixmap, QIcon::Normal, QIcon::On);
+    item->setIcon(icon);
 }
 

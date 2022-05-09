@@ -2,14 +2,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QMessageBox>
 #include <QPainter>
-#include <fstream>
-#include <map>
-#include <time.h>
 #include <QVector>
 #include <QPointF>
 #include "mygraph.h"
+#include "dialog.h"
+#include <fstream>
+#include <QListWidgetItem>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -23,74 +22,35 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
-
-    void on_horizontalSlider_choose_color_sliderMoved(int position);
-
-    void on_pushButton_axis_clicked();
-
-    void on_radioButton_file_clicked();
-
-    void on_radioButton_rand_clicked();
-
-    void on_pushButton_buildgraph_clicked();
-
-    void on_pushButton_select_file_clicked();
-
-    bool readFile(std::string filename,  QVector<QPointF>& points);
-
-    void on_pushButton_delete_clicked();
-
-
-    void on_horizontalScrollBar_valueChanged(int value);
-    void on_horizontalScrollBar_sliderPressed();
-    void on_horizontalScrollBar_sliderReleased();
-    void on_verticalScrollBar_valueChanged(int value);
-    void on_verticalScrollBar_sliderPressed();
-    void on_verticalScrollBar_sliderReleased();
-    void on_horizontalSlider_valueChanged(int value);
-
-
-
-protected:
-    //Отрисовка
-    void paintEvent(QPaintEvent *) override;
-
-    //Нажатие мыши
-    virtual void mousePressEvent(QMouseEvent*) override;
-
 private:
-    Ui::MainWindow *ui;
-
-    //Массив графиков
-    QVector<MyGraph> vecGraph;
-
-    //Название выбранного файла
-    QString filename;
-
     //Размеры активного окна
-    float myWidth, myHeight;
-
-    //Абсолютный центр окна
-    float centerX, centerY;
-
-    //Абсолютное начало окна
-    float windowX, windowY;
+    float myWidth;
+    float myHeight;
 
     //Глобальное расположение мыши
     QPoint mousePos;
+
+    //Виджеты
+    Ui::MainWindow *ui;
 
     //Пересечиние графика и мышки
     bool collision = false;
 
     //Отсут от groupBox, выставляется в коде!
     float punding_x_left = 0;
+    float punding_x_right = 0;
+    float punding_x = 0;
+
 
     //Локальные координаты мыши
-    float mouseX, mouseY;
+    float mouseX;
+    float mouseY;
 
     //Точка пересечения графика и мышки
     QPointF ans_point;
+
+    //Массив графиков
+    QVector<MyGraph> vecGraph;
 
     //Скроллы и их активность
     bool scrool_x_active = false;
@@ -104,6 +64,40 @@ private:
 
     //Приближение коэф
     float zoom = 1;
+
+    //Подпись осей
+    QString titleAxisX = "X";
+    QString titleAxisY = "Y";
+
+    //название выбранного файла
+    QString filename;
+
+    //Размер рамки
+    float frame_size = 0;
+
+protected:
+    //Нажатие мыши
+    virtual void mousePressEvent(QMouseEvent* event);
+    //Отрисовка
+    void paintEvent(QPaintEvent *event);
+
+private slots:
+    void on_horizontalScrollBar_valueChanged(int value);
+    void on_horizontalScrollBar_sliderPressed();
+    void on_horizontalScrollBar_sliderReleased();
+    void on_verticalScrollBar_valueChanged(int value);
+    void on_verticalScrollBar_sliderPressed();
+    void on_verticalScrollBar_sliderReleased();
+    void on_horizontalSlider_valueChanged(int value);
+    void on_pushButton_clicked();
+    void on_pushButton_3_clicked();
+    void on_horizontalSlider_2_sliderMoved(int position);
+    void on_pushButton_2_clicked();
+    void on_pushButton_4_clicked();
+    void on_radioButton_clicked();
+    void on_radioButton_2_clicked();
+    bool readFile(std::string filename,  QVector<QPointF>& points);
+    void on_listWidget_itemClicked(QListWidgetItem *item);
+    void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
 };
 #endif // MAINWINDOW_H
-

@@ -14,8 +14,7 @@ MyGraph::MyGraph(QVector<QPointF> vec, QString name, QColor color)
 
     //Цвет графика
     this->colorGraph = color;
-
-    //Название графика
+    //Имя графика
     this->nameGraph = name;
 
     std::sort(arr_points.begin(), arr_points.end(), comp);
