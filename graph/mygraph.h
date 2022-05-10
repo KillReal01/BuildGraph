@@ -20,7 +20,7 @@ public:
 
     // Проверка пересечения графика с координатами мыши
     bool check_collision(float x, float y);
-    bool check_collision2(float x, float y, QPointF &ans);
+    bool check_collision2(float x, float y, QPointF &ans, float zoom);
 
     // Гетеры для максимальных и минимальных точек графика, чтобы не повредить константы
     float get_maxX();

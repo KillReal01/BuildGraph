@@ -52,6 +52,10 @@ private:
     //Массив графиков
     QVector<MyGraph> vecGraph;
 
+    //Активация графика
+    QString src_name = "";
+    QColor src_color;
+
     //Скроллы и их активность
     bool scrool_x_active = false;
     bool scrool_y_active = false;
@@ -73,11 +77,45 @@ private:
     QString filename;
 
     //Размер рамки
-    float frame_size = 0;
+    float frame_size_x = 60;
+    float frame_size_y = 40;
+
+    //Разметка
+    void markup_axis_X(QPainter *painter);
+    void markup_axis_X2(QPainter *painter);
+    void markup_axis_Y2(QPainter *painter);
+
+    void markup_axis_X2_down(QPainter *painter);
+    void markup_axis_X2_up(QPainter *painter);
+
+    void markup_axis_Y2_left(QPainter *painter);
+    void markup_axis_Y2_right(QPainter *painter);
+    float size_markup_axis_line = 4;
+
+
+    //Максимальный размер холста в координтах
+    float canvas_max_x;
+    float canvas_min_x;
+
+    float canvas_max_y;
+    float canvas_min_y;
+
+    //
+    float mouse_before_press_X;
+    float mouse_before_press_Y;
+
+    //
+    int scroll_k = 100000;
+
+    //
+    bool moveSroll_active = false;
 
 protected:
     //Нажатие мыши
     virtual void mousePressEvent(QMouseEvent* event);
+    virtual void mouseReleaseEvent(QMouseEvent* event);
+    virtual void mouseMoveEvent(QMouseEvent* event);
+    virtual void mouseDoubleClickEvent(QMouseEvent* event);
     //Отрисовка
     void paintEvent(QPaintEvent *event);
 
@@ -99,5 +137,6 @@ private slots:
     bool readFile(std::string filename,  QVector<QPointF>& points);
     void on_listWidget_itemClicked(QListWidgetItem *item);
     void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
+    void on_listWidget_itemPressed(QListWidgetItem *item);
 };
 #endif // MAINWINDOW_H

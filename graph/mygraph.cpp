@@ -61,7 +61,7 @@ bool MyGraph::check_collision(float x, float y)
 }
 
 //Проверка пересечения мышки и графика (Новая версия через уравнение прямой -> вроде работает круто)
-bool MyGraph::check_collision2(float x, float y, QPointF &ans)
+bool MyGraph::check_collision2(float x, float y, QPointF &ans, float zoom)
 {
     //Проходим по всем линиям графика
     for (int i = 0; i < std::size(arr_points) - 1; i++)
@@ -85,7 +85,7 @@ bool MyGraph::check_collision2(float x, float y, QPointF &ans)
 
            //Проверка значения X через уравнение прямой
            float real_x = (( (y - y1) * (x2 - x1) ) / (y2 - y1)) + x1;
-           bool ans_x = (abs(real_x - x) < 10);
+           bool ans_x = (abs(real_x - x) < 6/zoom);
 
            //Пересечение найдено, возращаем точку косания через адрес
            if (ans_x & ans_y)
@@ -102,7 +102,7 @@ bool MyGraph::check_collision2(float x, float y, QPointF &ans)
 
            //Проверка значения Y через уравнение прямой
            float real_y = (( (x - x1) * (y2 - y1) ) / (x2 - x1)) + y1;
-           bool ans_y = (abs(real_y - y) < 10);
+           bool ans_y = (abs(real_y - y) < 6/zoom);
 
            //Пересечение найдено, возращаем точку косания через адрес
            if (ans_x & ans_y)
@@ -117,6 +117,7 @@ bool MyGraph::check_collision2(float x, float y, QPointF &ans)
     //Пересечение НЕ найдено
     return false;
 }
+
 
 
 // Гетеры для максимальных и минимальных точек графика
