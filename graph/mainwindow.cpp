@@ -563,7 +563,6 @@ void MainWindow::markup_axis_Y2_right(QPainter *painter)
 //Событие: Нажатие кнопки мыши
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
-    //qDebug() << "mousePressEvent";
     mouse_before_press_X = this->mapFromGlobal(QCursor::pos()).x();
     mouse_before_press_Y = this->mapFromGlobal(QCursor::pos()).y();
 }
@@ -572,7 +571,6 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
     collision = false;
     repaint();
-    //qDebug() << "mouseReleaseEvent";
     mouse_before_press_X = this->mapFromGlobal(QCursor::pos()).x();
     mouse_before_press_Y = this->mapFromGlobal(QCursor::pos()).y();
 
@@ -580,8 +578,6 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
-    //qDebug() << "mouseMoveEvent";
-
     //Глобальные координаты мыши
     mousePos = this->mapFromGlobal(QCursor::pos());
 
@@ -590,7 +586,6 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
     mouseY = (-mousePos.y() / zoom + myHeight/2 + scrool_y / zoom);
 
     QString mousePosToStr1 = QString("Answer is (x=%1, y=%2)").arg(mouseX).arg(mouseY);
-    //qDebug() << mousePosToStr1;
 
     collision = false;
     //Проверка пересечний мышки с графиком
@@ -630,8 +625,6 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
         float y = ui->verticalScrollBar->value();
         ui->verticalScrollBar->setValue(y + scroll_k*mouse_update_Y/zoom);
-
-        qDebug() << mouse_update_X << " | " << mouse_update_Y;
         repaint();
     }
 
@@ -639,7 +632,6 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    qDebug() << "mouseDoubleClickEvent";
 
     //Глобальные координаты мыши
     mousePos = this->mapFromGlobal(QCursor::pos());
@@ -649,7 +641,6 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
     mouseY = (-mousePos.y() / zoom + myHeight/2 + scrool_y / zoom);
 
     QString mousePosToStr1 = QString("Answer is (x=%1, y=%2)").arg(mouseX).arg(mouseY);
-    //qDebug() << mousePosToStr1;
 
     collision = false;
     int index_graph = -1;
@@ -903,8 +894,8 @@ void MainWindow::paintEvent(QPaintEvent *event)
     font.setBold(QFont::Bold);
     painter.setFont(font);
 
-    painter.drawText(QPoint((myWidth*zoom/2) - frame_size_x - (std::size(titleAxisX) * 5.75) - 40, -5 + scrool_y), titleAxisX);
-    painter.drawText(QPoint(5 + scrool_x,(-myHeight*zoom/2) + 25 + frame_size_y), titleAxisY);
+    painter.drawText(QPoint((myWidth*zoom/2) - frame_size_x - (std::size(titleAxisX) * 5.75) - 20, -15 + scrool_y), titleAxisX);
+    painter.drawText(QPoint(40 + scrool_x,(-myHeight*zoom/2) + 25 + frame_size_y), titleAxisY);
     //painter.drawText(point, "Y");
 
 
@@ -944,7 +935,6 @@ void MainWindow::paintEvent(QPaintEvent *event)
 
 void MainWindow::on_horizontalScrollBar_valueChanged(int value)
 {
-    qDebug() << value;
     scrool_x = -value/scroll_k * zoom;
     if (scrool_x_active)
         repaint();
@@ -965,7 +955,6 @@ void MainWindow::on_horizontalScrollBar_sliderReleased()
 
 void MainWindow::on_verticalScrollBar_valueChanged(int value)
 {
-    //qDebug() << value;
     scrool_y = -value/scroll_k * zoom;
     if (scrool_y_active)
         repaint();
@@ -987,7 +976,6 @@ void MainWindow::on_verticalScrollBar_sliderReleased()
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)
 {
-    qDebug() << value;
     if (value >= 0)
     {
         zoom = value + 1;
