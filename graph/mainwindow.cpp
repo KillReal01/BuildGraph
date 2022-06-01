@@ -102,7 +102,6 @@ void MainWindow::change_horizontalScrollBar()
     //Обновление размера холста
     canvas_max_x = width() + ui->horizontalScrollBar->maximum()/scroll_k * zoom;
     canvas_min_x = -width() + ui->horizontalScrollBar->minimum()/scroll_k * zoom;
-    //qDebug() << ui->horizontalScrollBar->minimum() << "  |  " << ui->horizontalScrollBar->maximum();
 }
 
 void MainWindow::change_verticalScrollBar()
@@ -147,7 +146,6 @@ void MainWindow::change_verticalScrollBar()
     //Обновление размера холста
     canvas_max_y = height() + ui->verticalScrollBar->maximum()/scroll_k * zoom;
     canvas_min_y = -height() + ui->verticalScrollBar->minimum()/scroll_k * zoom;
-    //qDebug() << ui->verticalScrollBar->minimum() << "  |  " << ui->verticalScrollBar->maximum();
 }
 
 
@@ -855,7 +853,6 @@ void MainWindow::paintEvent(QPaintEvent *event)
                            (-vecGraph[j].arr_points[i+1].y() * zoom + scrool_y)
                            );
 
-               //qDebug() << vecGraph[j].get_select();
                QPen myPen;
                if (vecGraph[j].get_select())
                    myPen = QPen(Qt::red, 3, Qt::SolidLine, Qt::SquareCap);
@@ -1079,20 +1076,41 @@ void MainWindow::on_pushButton_2_clicked()
                 repeat = true;
         }
         if (!repeat){
-            QListWidgetItem* item = new QListWidgetItem;
+            //Дополнение легенды
+            QListWidgetItem* item = new QListWidgetItem(ui->listWidget);
+            QWidget* wgt = new QWidget;
+            QLayout* l = new QHBoxLayout;
 
-            item->setText(name);
-            item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-            item->setCheckState(Qt::Checked); // AND initialize check state
+            //Имя
+            QLabel* label = new QLabel;
+            label->setText(name);
 
-            //Цвет графика
-            QPixmap pixmap (50, 50);
-            pixmap.fill(color);
-            QIcon icon;
-            icon.addPixmap(pixmap, QIcon::Normal, QIcon::On);
-            item->setIcon(icon);
+            //Кнопка
+            QPushButton* btn = new QPushButton("");
+            btn->setFixedSize(20, 20);
+            btn->setFlat(true);
+            btn->setAutoFillBackground(true);
+            QPalette pal = btn->palette();
+            pal.setColor(QPalette::Button, color);
+            btn->setPalette(pal);
 
-            ui->listWidget->addItem(item);
+            //Чекбокс
+            QCheckBox *box = new QCheckBox();
+            box->setCheckState(Qt::Checked);
+
+            connect(btn, SIGNAL(clicked()), SLOT(onBtnClicked()));
+            //connect(label, label->linkActivated(label->text()), SLOT(onItemClicked()));
+            connect(box, SIGNAL(clicked()), SLOT(onCheckBoxClicked()));
+
+            l->addWidget(box);
+            l->addWidget(btn);
+            l->addWidget(label);
+            l->setAlignment(Qt::AlignLeft);
+
+            wgt->setLayout(l);
+            item->setSizeHint(wgt->sizeHint());
+
+            ui->listWidget->setItemWidget(item, wgt);
 
             MyGraph tempgr(temp, name, color);
             vecGraph.push_back(tempgr);
@@ -1105,7 +1123,65 @@ void MainWindow::on_pushButton_2_clicked()
     update();
 }
 
-void MainWindow::on_pushButton_4_clicked() // кнопка удаление графика
+void MainWindow::onItemClicked(){
+    if( QLabel* label = qobject_cast<QLabel*>(sender())) {
+        qDebug() << "change";
+    }
+}
+
+//Смена цвета (кнопка)
+void MainWindow::onBtnClicked() {
+    if( QPushButton* btn = qobject_cast< QPushButton* >(sender())) {
+        if( QLabel* e = btn->parent()->findChild< QLabel* >()) {
+            Dialog dialog;
+            dialog.setModal(true);
+
+            //Меняем цвет, если нажата кнопка "ОК"
+            if (dialog.exec () == QDialog :: Accepted){
+                QColor newColor = dialog.sendColor();
+                //Меняем цвет графика
+                for (auto &i : vecGraph){
+                    if (i.nameGraph == e->text()){
+                        i.colorGraph = newColor;
+                    }
+                }
+                btn->setFlat(true);
+                btn->setAutoFillBackground(true);
+                QPalette pal = btn->palette();
+                pal.setColor(QPalette::Button, newColor);
+                btn->setPalette(pal);
+            }
+            return;
+         }
+    }
+}
+
+//Показать/убрать график
+void MainWindow::onCheckBoxClicked(){
+    if( QCheckBox* box = qobject_cast< QCheckBox* >(sender())) {
+        if( QLabel* e = box->parent()->findChild< QLabel* >()) {
+            if (box->checkState() == Qt::Checked){
+                //Активация графика
+                for (auto &i : vecGraph){
+                    if (i.nameGraph == e->text())
+                        i.show = true;
+                }
+            }
+            if (box->checkState() == Qt::Unchecked){
+                //Деактивация графика
+                for (auto &i : vecGraph){
+                    if (i.nameGraph == e->text())
+                        i.show = false;
+                }
+            }
+            update();
+         }
+    }
+}
+
+
+//Кнопка удаление графика
+void MainWindow::on_pushButton_4_clicked()
 {
     if (vecGraph.size() != 0) {
         vecGraph.clear();
@@ -1126,79 +1202,19 @@ void MainWindow::on_radioButton_clicked() // выбрали рандомный �
 }
 
 
-void MainWindow::on_radioButton_2_clicked()
+void MainWindow::on_radioButton_2_clicked()//выбрали файл
 {
     ui->pushButton->setEnabled(true);
     ui->pushButton_2->setEnabled(true);
 }
 
-//Hide/show график
+//Выделение графика
 void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
 {
-    if (item->checkState() == Qt::Checked){
-        //Активация графика
-        for (auto &i : vecGraph){
-            if (i.nameGraph == item->text())
-                i.show = true;
-        }
-    }
-    if (item->checkState() == Qt::Unchecked){
-        //Деактивация графика
-        for (auto &i : vecGraph){
-            if (i.nameGraph == item->text())
-                i.show = false;
-        }
-    }
-    update();
-}
-
-//Меняем цвет графика
-void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
-{
-    Dialog dialog;
-    dialog.setModal(true);
-
-    //Меняем цвет, если нажата кнопка "ОК"
-    if (dialog.exec () == QDialog :: Accepted){
-        QColor newColor = dialog.sendColor();
-        //Меняем цвет графика
-        for (auto &i : vecGraph){
-            if (i.nameGraph == item->text()){
-                i.colorGraph = newColor;
-            }
-        }
-
-        //Меняем цвет иконки
-        QPixmap pixmap (50, 50);
-        pixmap.fill(newColor);
-        QIcon icon;
-        icon.addPixmap(pixmap, QIcon::Normal, QIcon::On);
-        item->setIcon(icon);
-    }
-}
-
-
-void MainWindow::on_listWidget_itemPressed(QListWidgetItem *item)
-{
     for(int i = 0; i < ui->listWidget->count(); i++){
+
         QListWidgetItem* cur = ui->listWidget->item(i);
-        QIcon icon = cur->icon();
-
-        QPixmap *p = new QPixmap;
-        *p = icon.pixmap(50,50);
-        QImage *img = new QImage;
-        *img = p->toImage();
-        QRgb b = img->pixel(1,1);
-        QColor *c = new QColor;
-        c->setRgb(b);
-
         if (cur->isSelected()){
-//            if (vecGraph[i].colorGraph == c->toRgb()){
-//                vecGraph[i].colorGraph = Qt::red;
-//            }
-//            else{
-//                vecGraph[i].colorGraph = c->toRgb();
-//            }
             if (vecGraph[i].get_select())
             {
                 vecGraph[i].set_select(false);
@@ -1208,9 +1224,10 @@ void MainWindow::on_listWidget_itemPressed(QListWidgetItem *item)
                 vecGraph[i].set_select(true);
         }
         if (!cur->isSelected()){
-            //vecGraph[i].colorGraph = c->toRgb();
             vecGraph[i].set_select(false);
         }
     }
+    update();
 }
+
 

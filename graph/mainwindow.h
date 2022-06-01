@@ -9,6 +9,9 @@
 #include "dialog.h"
 #include <fstream>
 #include <QListWidgetItem>
+#include <QCheckBox>
+#include <QTextItem>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -113,6 +116,7 @@ private:
     //Мини-Карта
     void mini_map_draw(QPainter &painter);
 
+
 protected:
     //Нажатие мыши
     virtual void mousePressEvent(QMouseEvent* event);
@@ -139,7 +143,8 @@ private slots:
     void on_radioButton_2_clicked();
     bool readFile(std::string filename,  QVector<QPointF>& points);
     void on_listWidget_itemClicked(QListWidgetItem *item);
-    void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
-    void on_listWidget_itemPressed(QListWidgetItem *item);
+    void onBtnClicked();
+    void onCheckBoxClicked();
+    void onItemClicked();
 };
 #endif // MAINWINDOW_H
