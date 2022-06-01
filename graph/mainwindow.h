@@ -10,7 +10,6 @@
 #include <fstream>
 #include <QListWidgetItem>
 #include <QCheckBox>
-#include <QTextItem>
 
 
 QT_BEGIN_NAMESPACE
