@@ -145,6 +145,5 @@ private slots:
     void on_listWidget_itemClicked(QListWidgetItem *item);
     void onBtnClicked();
     void onCheckBoxClicked();
-    void onItemClicked();
 };
 #endif // MAINWINDOW_H
