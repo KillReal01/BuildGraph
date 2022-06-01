@@ -1099,7 +1099,6 @@ void MainWindow::on_pushButton_2_clicked()
             box->setCheckState(Qt::Checked);
 
             connect(btn, SIGNAL(clicked()), SLOT(onBtnClicked()));
-            //connect(label, label->linkActivated(label->text()), SLOT(onItemClicked()));
             connect(box, SIGNAL(clicked()), SLOT(onCheckBoxClicked()));
 
             l->addWidget(box);
@@ -1121,12 +1120,6 @@ void MainWindow::on_pushButton_2_clicked()
     }
     filename = "";
     update();
-}
-
-void MainWindow::onItemClicked(){
-    if( QLabel* label = qobject_cast<QLabel*>(sender())) {
-        qDebug() << "change";
-    }
 }
 
 //Смена цвета (кнопка)
