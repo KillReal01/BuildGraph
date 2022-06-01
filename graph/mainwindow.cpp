@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("Построение графиков");
     ui->widget->setStyleSheet(QString("background-color: rgb(0, 0, 0);"));
     ui->pushButton->setEnabled(false);
+    ui->pushButton_2->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -223,7 +224,7 @@ void MainWindow::markup_axis_X2_down(QPainter *painter)
     {
 
         //Выключить отрисовку за рамкой
-        if ((i+scrool_x) > myWidth/2*zoom - frame_size_x - 25)
+        if ((i+scrool_x) > myWidth/2*zoom - frame_size_x)
             continue;
         if ((i+scrool_x) < -myWidth/2*zoom + frame_size_x)
             continue;
@@ -255,7 +256,7 @@ void MainWindow::markup_axis_X2_down(QPainter *painter)
         //Выключить отрисовку за рамкой
         if ((i+scrool_x) < -myWidth/2*zoom + frame_size_x)
             continue;
-        if ((i+scrool_x) > myWidth/2*zoom - frame_size_x - 25)
+        if ((i+scrool_x) > myWidth/2*zoom - frame_size_x)
             continue;
 
         if ((int)-i % 50 == 0)
@@ -295,7 +296,7 @@ void MainWindow::markup_axis_X2_up(QPainter *painter)
     {
 
         //Выключить отрисовку за рамкой
-        if ((i+scrool_x) > myWidth/2*zoom - frame_size_x - 25)
+        if ((i+scrool_x) > myWidth/2*zoom - frame_size_x)
             continue;
         if ((i+scrool_x) < -myWidth/2*zoom + frame_size_x)
             continue;
@@ -326,7 +327,7 @@ void MainWindow::markup_axis_X2_up(QPainter *painter)
         //Выключить отрисовку за рамкой
         if ((i+scrool_x) < -myWidth/2*zoom + frame_size_x)
             continue;
-        if ((i+scrool_x) > myWidth/2*zoom - frame_size_x - 25)
+        if ((i+scrool_x) > myWidth/2*zoom - frame_size_x)
             continue;
 
         if ((int)-i % 50 == 0)
@@ -507,7 +508,7 @@ void MainWindow::markup_axis_Y2_right(QPainter *painter)
 
         if ((int)i % 50 == 0)
         {
-            painter->drawText(12-size + zoom*myWidth/2 - frame_size_x  - 30,
+            painter->drawText(12-size + zoom*myWidth/2 - frame_size_x,
                               i + scrool_y,
                               QString("%1").arg(round(i/zoom*10)/10.0f)
                              );
@@ -518,9 +519,9 @@ void MainWindow::markup_axis_Y2_right(QPainter *painter)
             painter->setPen(QPen(Qt::black, 1));
         }
 
-        painter->drawLine(-size + zoom*myWidth/2 - frame_size_x - 30,
+        painter->drawLine(-size + zoom*myWidth/2 - frame_size_x,
                           i + scrool_y,
-                          size + zoom*myWidth/2 - frame_size_x - 30,
+                          size + zoom*myWidth/2 - frame_size_x,
                           i + scrool_y
                           );
 
@@ -533,12 +534,12 @@ void MainWindow::markup_axis_Y2_right(QPainter *painter)
         //Выключить отрисовку за рамкой
         if ((i+scrool_y) < -myHeight/2*zoom + frame_size_y)
             continue;
-        if ((i+scrool_y) > myHeight/2*zoom - frame_size_y - 30)
+        if ((i+scrool_y) > myHeight/2*zoom - frame_size_y)
             continue;
 
         if ((int)-i % 50 == 0)
         {
-            painter->drawText(12-size + zoom*myWidth/2 - frame_size_x  - 30,
+            painter->drawText(12-size + zoom*myWidth/2 - frame_size_x,
                               i + scrool_y,
                               QString("%1").arg(round(i/zoom*10)/10.0f)
                              );
@@ -549,9 +550,9 @@ void MainWindow::markup_axis_Y2_right(QPainter *painter)
             painter->setPen(QPen(Qt::black, 1));
         }
 
-        painter->drawLine(-size + zoom*myWidth/2 - frame_size_x - 30,
+        painter->drawLine(-size + zoom*myWidth/2 - frame_size_x,
                           i + scrool_y,
-                          size + zoom*myWidth/2 - frame_size_x - 30,
+                          size + zoom*myWidth/2 - frame_size_x,
                           i + scrool_y
                           );
     }
@@ -569,6 +570,8 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
+    collision = false;
+    repaint();
     //qDebug() << "mouseReleaseEvent";
     mouse_before_press_X = this->mapFromGlobal(QCursor::pos()).x();
     mouse_before_press_Y = this->mapFromGlobal(QCursor::pos()).y();
@@ -636,8 +639,157 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    //qDebug() << "mouseDoubleClickEvent";
+    qDebug() << "mouseDoubleClickEvent";
+
+    //Глобальные координаты мыши
+    mousePos = this->mapFromGlobal(QCursor::pos());
+
+    //Локальные координаты мыши
+    mouseX = mousePos.x() / zoom - (myWidth/2 + punding_x_left / zoom + scrool_x / zoom);
+    mouseY = (-mousePos.y() / zoom + myHeight/2 + scrool_y / zoom);
+
+    QString mousePosToStr1 = QString("Answer is (x=%1, y=%2)").arg(mouseX).arg(mouseY);
+    //qDebug() << mousePosToStr1;
+
+    collision = false;
+    int index_graph = -1;
+    //Проверка пересечний мышки с графиком
+    for (int i = 0; i < std::size(vecGraph); i++)
+    {
+        if ((vecGraph[i].check_collision2(mouseX, mouseY, ans_point, zoom)) && !vecGraph[i].get_select())
+        {
+            index_graph = i;
+        }
+        vecGraph[i].set_select(false);
+
+    }
+
+    for(int i = 0; i < ui->listWidget->count(); i++){
+        QListWidgetItem* cur = ui->listWidget->item(i);
+        QIcon icon = cur->icon();
+
+        QPixmap *p = new QPixmap;
+        *p = icon.pixmap(50,50);
+        QImage *img = new QImage;
+        *img = p->toImage();
+        QRgb b = img->pixel(1,1);
+        QColor *c = new QColor;
+        c->setRgb(b);
+        cur->setSelected(false);
+        if (i == index_graph)
+            cur->setSelected(true);
+    }
+
+    if (index_graph != -1)
+    {
+        vecGraph[index_graph].set_select(true);
+        repaint();
+    }
+
+
 }
+
+
+void MainWindow::mini_map_draw(QPainter &painter)
+{
+    float width_RP = ui->groupBox_right->width();
+    float height_RP = ui->verticalSpacer_miniMap->geometry().height();
+    float spaceXY = 10;
+
+
+    //Рамка
+    painter.setPen(QPen(Qt::black, 2));
+    painter.drawRect(width()/2 - width_RP + spaceXY, height()/2 - height_RP - spaceXY, width_RP - 2*spaceXY, height_RP - 2*spaceXY);
+
+    float centreW = (width()/2 - width_RP/2);
+    float centreH = (height()/2 - height_RP/2 - 2*spaceXY);
+    painter.translate(centreW, centreH);
+
+    width_RP -= spaceXY*2;
+    height_RP -= spaceXY*2;
+
+    //Оси
+    painter.setPen(QPen(Qt::black, 1));
+    painter.drawLine(-width_RP/2, 0, width_RP/2, 0);
+    painter.drawLine(0, -height_RP/2, 0, height_RP/2);
+
+
+    //Находим крайние X графиков
+    float maxX = -9999999;
+    for (int i = 0; i < std::size(vecGraph); i++)
+    {
+        float new_maxX = abs(vecGraph[i].get_minX());
+        if (new_maxX > maxX)
+            maxX = new_maxX;
+
+        new_maxX = abs(vecGraph[i].get_maxX());
+        if (new_maxX > maxX)
+            maxX = new_maxX;
+    }
+
+    //Находим крайние Y графиков
+    float maxY = -99999;
+    for (int i = 0; i < std::size(vecGraph); i++)
+    {
+        float new_maxY = abs(vecGraph[i].get_minY());
+        if (new_maxY > maxY)
+            maxY = new_maxY;
+
+        new_maxY = abs(vecGraph[i].get_maxY());
+        if (new_maxY > maxY)
+            maxY = new_maxY;
+    }
+
+    float zoomY = height_RP / ((maxY)*2);
+    float zoomX = width_RP / ((maxX)*2);
+
+    float zoom_mm = zoomX;
+    if (zoomY < zoom_mm)
+        zoom_mm = zoomY;
+
+
+    for (int j = 0; j < std::size(vecGraph); j++)
+       {
+           for (int i = 0; i < std::size(vecGraph[j].arr_points) - 1; i++)
+           {
+               QLineF line(
+                           (vecGraph[j].arr_points[i].x()) * zoom_mm,
+                           (-vecGraph[j].arr_points[i].y()) * zoom_mm,
+                           (vecGraph[j].arr_points[i+1].x()) * zoom_mm,
+                           (-vecGraph[j].arr_points[i+1].y()) * zoom_mm
+                           );
+
+               QPen myPen(vecGraph[j].colorGraph, 1, Qt::SolidLine, Qt::SquareCap);
+               painter.setPen(myPen);
+               //Рисуем выбранные графики
+               if (vecGraph[j].show)
+                   painter.drawLine(line);
+           }
+       }
+
+
+    painter.setPen(QPen(Qt::red, 1));
+    float xx2 = (myWidth/2 - frame_size_x - scrool_x/zoom) * zoom_mm;
+    float xx1 = (-myWidth/2 + frame_size_x - scrool_x/zoom) * zoom_mm;
+    float yy1 = (myHeight/2 - frame_size_y - scrool_y/zoom) * zoom_mm;
+    float yy2 = (-myHeight/2 + frame_size_y - scrool_y/zoom) * zoom_mm;
+
+    if (xx1 < -width_RP/2)
+        xx1 = -width_RP/2;
+    if (xx2 > width_RP/2)
+        xx2 = width_RP/2;
+
+
+    if (yy2 < -height_RP/2)
+        yy2 = -height_RP/2;
+    if (yy1 > height_RP/2)
+        yy1 = height_RP/2;
+
+    painter.drawRect(xx1, yy2, abs(xx1-xx2), abs(yy1-yy2));
+}
+
+
+
 
 
 //Событие: Перерисовка (При изменении окна + специальный вызвов repaint)
@@ -712,7 +864,13 @@ void MainWindow::paintEvent(QPaintEvent *event)
                            (-vecGraph[j].arr_points[i+1].y() * zoom + scrool_y)
                            );
 
-               QPen myPen(vecGraph[j].colorGraph, 2, Qt::SolidLine, Qt::SquareCap);
+               //qDebug() << vecGraph[j].get_select();
+               QPen myPen;
+               if (vecGraph[j].get_select())
+                   myPen = QPen(Qt::red, 3, Qt::SolidLine, Qt::SquareCap);
+               else
+                   myPen = QPen(vecGraph[j].colorGraph, 2, Qt::SolidLine, Qt::SquareCap);
+
                painter.setPen(myPen);
                //Рисуем выбранные графики
                if (vecGraph[j].show)
@@ -720,16 +878,19 @@ void MainWindow::paintEvent(QPaintEvent *event)
            }
        }
 
-    //Линии для выделения координат у точки пересечения
-    painter.setPen(QPen(Qt::red, 1, Qt::DashLine, Qt::SquareCap));
-    painter.drawLine((ans_point.x() * zoom + scrool_x), (-ans_point.y() * zoom + scrool_y), scrool_x, (-ans_point.y() * zoom + scrool_y));
-    painter.drawLine((ans_point.x() * zoom + scrool_x), (-ans_point.y() * zoom + scrool_y), (ans_point.x() * zoom + scrool_x), scrool_y);
+
+
 
     //Отрисовка точки касания
     painter.setPen(Qt::red);
     painter.setBrush(QBrush(Qt::red, Qt::SolidPattern));
-    //if (collision)
+    if (collision)
     {
+        //Линии для выделения координат у точки пересечения
+        painter.setPen(QPen(Qt::red, 1, Qt::DashLine, Qt::SquareCap));
+        painter.drawLine((ans_point.x() * zoom + scrool_x), (-ans_point.y() * zoom + scrool_y), scrool_x, (-ans_point.y() * zoom + scrool_y));
+        painter.drawLine((ans_point.x() * zoom + scrool_x), (-ans_point.y() * zoom + scrool_y), (ans_point.x() * zoom + scrool_x), scrool_y);
+        //Отрисовка точки касания
         painter.drawEllipse((ans_point.x() * zoom + scrool_x) - 3, (-ans_point.y() * zoom + scrool_y) - 3, 6, 6);
     }
 
@@ -756,11 +917,11 @@ void MainWindow::paintEvent(QPaintEvent *event)
     painter.drawRect(-zoom*myWidth/2, zoom*myHeight/2 - frame_size_y -30, width(), frame_size_y + 30);
 
     painter.drawRect(-zoom*myWidth/2, -zoom*myHeight/2, frame_size_x, height());
-    painter.drawRect(zoom*myWidth/2 - frame_size_x - 25, -zoom*myHeight/2, frame_size_x + 25, height());
+    painter.drawRect(zoom*myWidth/2 - frame_size_x, -zoom*myHeight/2, width(), height());
 
     painter.setPen(Qt::black);
     painter.setBrush(QBrush(Qt::NoBrush));
-    painter.drawRect(-zoom*myWidth/2 + frame_size_x, -zoom*myHeight/2 + frame_size_y, zoom*myWidth - frame_size_x*2 - 25, zoom*myHeight - frame_size_y*2 - 30);
+    painter.drawRect(-zoom*myWidth/2 + frame_size_x, -zoom*myHeight/2 + frame_size_y, zoom*myWidth - frame_size_x*2, zoom*myHeight - frame_size_y*2 - 30);
     //painter.drawRect(0, 0, 100, 100);
 
     //Разметка осей
@@ -774,6 +935,10 @@ void MainWindow::paintEvent(QPaintEvent *event)
     if (axis_Y_right_show)
     markup_axis_Y2_right(&painter);
     //markup_axis_Y2(&painter);
+
+
+    //Мини_Карта
+    mini_map_draw(painter);
 
 }
 
@@ -880,7 +1045,7 @@ bool MainWindow::readFile(std::string filename,  QVector<QPointF>& points){
             file >> x >> y;
             points.push_back(QPoint(x, -y));//то что выше оси ох < 0
         }
-        file.close();
+        file.close();      
         return true;
     }
 }
@@ -903,10 +1068,12 @@ void MainWindow::on_pushButton_2_clicked()
     }
 
     if (ui->radioButton_2->isChecked()) {
-        readFile(filename.toStdString(), temp);
+        if (!readFile(filename.toStdString(), temp)){
+            QMessageBox::warning(this, "Ошибка", "Файл не выбран!", QMessageBox::Ok);
+            return;
+        }
     }
 
-    for (auto &i : temp) qDebug() << i.x() << " " << i.y();
 
     //цвет
     QColor color = ui->widget->palette().window().color();
@@ -946,7 +1113,7 @@ void MainWindow::on_pushButton_2_clicked()
             QMessageBox::warning(this, "Ошибка", "Такое имя уже используется!\nВыберите другое название для графика.", QMessageBox::Ok);
         }
     }
-
+    filename = "";
     update();
 }
 
@@ -967,12 +1134,14 @@ void MainWindow::on_pushButton_4_clicked() // кнопка удаление гр
 void MainWindow::on_radioButton_clicked() // выбрали рандомный график
 {
     ui->pushButton->setEnabled(false);
+    ui->pushButton_2->setEnabled(true);
 }
 
 
 void MainWindow::on_radioButton_2_clicked()
 {
     ui->pushButton->setEnabled(true);
+    ui->pushButton_2->setEnabled(true);
 }
 
 //Hide/show график
@@ -1000,22 +1169,24 @@ void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
 {
     Dialog dialog;
     dialog.setModal(true);
-    dialog.exec();
-    QColor newColor = dialog.sendColor();
 
-    //Меняем цвет графика
-    for (auto &i : vecGraph){
-        if (i.nameGraph == item->text()){
-            i.colorGraph = newColor;
+    //Меняем цвет, если нажата кнопка "ОК"
+    if (dialog.exec () == QDialog :: Accepted){
+        QColor newColor = dialog.sendColor();
+        //Меняем цвет графика
+        for (auto &i : vecGraph){
+            if (i.nameGraph == item->text()){
+                i.colorGraph = newColor;
+            }
         }
-    }
 
-    //Меняем цвет иконки
-    QPixmap pixmap (50, 50);
-    pixmap.fill(newColor);
-    QIcon icon;
-    icon.addPixmap(pixmap, QIcon::Normal, QIcon::On);
-    item->setIcon(icon);
+        //Меняем цвет иконки
+        QPixmap pixmap (50, 50);
+        pixmap.fill(newColor);
+        QIcon icon;
+        icon.addPixmap(pixmap, QIcon::Normal, QIcon::On);
+        item->setIcon(icon);
+    }
 }
 
 
@@ -1034,15 +1205,23 @@ void MainWindow::on_listWidget_itemPressed(QListWidgetItem *item)
         c->setRgb(b);
 
         if (cur->isSelected()){
-            if (vecGraph[i].colorGraph == c->toRgb()){
-                vecGraph[i].colorGraph = Qt::red;
+//            if (vecGraph[i].colorGraph == c->toRgb()){
+//                vecGraph[i].colorGraph = Qt::red;
+//            }
+//            else{
+//                vecGraph[i].colorGraph = c->toRgb();
+//            }
+            if (vecGraph[i].get_select())
+            {
+                vecGraph[i].set_select(false);
+                cur->setSelected(false);
             }
-            else{
-                vecGraph[i].colorGraph = c->toRgb();
-            }
+            else
+                vecGraph[i].set_select(true);
         }
         if (!cur->isSelected()){
-            vecGraph[i].colorGraph = c->toRgb();
+            //vecGraph[i].colorGraph = c->toRgb();
+            vecGraph[i].set_select(false);
         }
     }
 }

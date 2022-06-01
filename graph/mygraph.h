@@ -35,12 +35,16 @@ public:
     //Отображение графика
     bool show = true;
 
+    void set_select(bool value);
+    bool get_select();
+
 private:
     // Максимальные и минимальные точки графика, чтобы вписать в прямоугольник для скролла
     float minX = 0;
     float maxX = 0;
     float maxY = 0;
     float minY = 0;
+    bool selected = false;
 };
 
 #endif // MYGRAPH_H

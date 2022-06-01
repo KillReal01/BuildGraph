@@ -110,6 +110,9 @@ private:
     //
     bool moveSroll_active = false;
 
+    //Мини-Карта
+    void mini_map_draw(QPainter &painter);
+
 protected:
     //Нажатие мыши
     virtual void mousePressEvent(QMouseEvent* event);

@@ -140,3 +140,13 @@ float MyGraph::get_minY()
 {
     return minY;
 }
+
+void MyGraph::set_select(bool value)
+{
+    selected = value;
+}
+
+bool MyGraph::get_select()
+{
+    return selected;
+}

@@ -33,4 +33,3 @@ QColor Dialog::sendColor(){
     return ui->widget->palette().window().color();
 }
 
-
