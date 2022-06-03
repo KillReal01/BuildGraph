@@ -27,6 +27,22 @@ float floatMod(float a, float b)
     return mod;
 }
 
+float my_abs(float x)
+{
+    if (x < 0)
+        return (x*(-1));
+
+    return x;
+}
+
+int my_abs(int x)
+{
+    if (x < 0)
+        return (x*(-1));
+
+    return x;
+}
+
 float define_dist_axis(float value)
 {
     if (value < -5)
@@ -66,7 +82,7 @@ void MainWindow::change_horizontalScrollBar()
 {
     //Находим крайние X графиков
     float minX = 99999, maxX = -99999;
-    for (int i = 0; i < std::size(vecGraph); i++)
+    for (int i = 0; i < vecGraph.size(); i++)
     {
         float new_minX = vecGraph[i].get_minX();
         if (new_minX < minX)
@@ -108,7 +124,7 @@ void MainWindow::change_verticalScrollBar()
 {
     //Находим крайние Y графиков
     float minY = 99999, maxY = -99999;
-    for (int i = 0; i < std::size(vecGraph); i++)
+    for (int i = 0; i < vecGraph.size(); i++)
     {
         float new_minY = vecGraph[i].get_minY();
         if (new_minY < minY)
@@ -368,7 +384,7 @@ void MainWindow::markup_axis_Y2(QPainter *painter)
         {
             painter->drawText(size + scrool_x,
                               i + + scrool_y,
-                              QString("%1").arg(round(i/zoom*10)/10.0f)
+                              QString("%1").arg(round(-i/zoom*10)/10.0f)
                              );
             painter->setPen(QPen(Qt::black, 2));
         }
@@ -392,7 +408,7 @@ void MainWindow::markup_axis_Y2(QPainter *painter)
         {
             painter->drawText(size + scrool_x,
                               i + + scrool_y,
-                              QString("%1").arg(round(i/zoom*10)/10.0f)
+                              QString("%1").arg(round(-i/zoom*10)/10.0f)
                              );
             painter->setPen(QPen(Qt::black, 2));
         }
@@ -431,10 +447,10 @@ void MainWindow::markup_axis_Y2_left(QPainter *painter)
 
         if ((int)i % 50 == 0)
         {
-            QString str_num = QString("%1").arg(round(i/zoom*10)/10.0f);
-            painter->drawText(-5.75*(std::size(str_num))-12-size - zoom*myWidth/2+ frame_size_x,
+            QString str_num = QString("%1").arg(round(-i/zoom*10)/10.0f);
+            painter->drawText(-5.75*(str_num.size())-12-size - zoom*myWidth/2+ frame_size_x,
                               i + scrool_y,
-                              QString("%1").arg(round(i/zoom*10)/10.0f)
+                              QString("%1").arg(round(-i/zoom*10)/10.0f)
                              );
             painter->setPen(QPen(Qt::black, 2));
         }
@@ -463,10 +479,10 @@ void MainWindow::markup_axis_Y2_left(QPainter *painter)
 
         if ((int)-i % 50 == 0)
         {
-            QString str_num = QString("%1").arg(round(i/zoom*10)/10.0f);
-            painter->drawText(-5.75*(std::size(str_num))-12-size - zoom*myWidth/2+ frame_size_x,
+            QString str_num = QString("%1").arg(round(-i/zoom*10)/10.0f);
+            painter->drawText(-5.75*(str_num.size())-12-size - zoom*myWidth/2+ frame_size_x,
                               i + scrool_y,
-                              QString("%1").arg(round(i/zoom*10)/10.0f)
+                              QString("%1").arg(round(-i/zoom*10)/10.0f)
                              );
             painter->setPen(QPen(Qt::black, 2));
         }
@@ -508,7 +524,7 @@ void MainWindow::markup_axis_Y2_right(QPainter *painter)
         {
             painter->drawText(12-size + zoom*myWidth/2 - frame_size_x,
                               i + scrool_y,
-                              QString("%1").arg(round(i/zoom*10)/10.0f)
+                              QString("%1").arg(round(-i/zoom*10)/10.0f)
                              );
             painter->setPen(QPen(Qt::black, 2));
         }
@@ -539,7 +555,7 @@ void MainWindow::markup_axis_Y2_right(QPainter *painter)
         {
             painter->drawText(12-size + zoom*myWidth/2 - frame_size_x,
                               i + scrool_y,
-                              QString("%1").arg(round(i/zoom*10)/10.0f)
+                              QString("%1").arg(round(-i/zoom*10)/10.0f)
                              );
             painter->setPen(QPen(Qt::black, 2));
         }
@@ -587,7 +603,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
     collision = false;
     //Проверка пересечний мышки с графиком
-    for (int i = 0; i < std::size(vecGraph); i++)
+    for (int i = 0; i < vecGraph.size(); i++)
     {
         if (vecGraph[i].check_collision2(mouseX, mouseY, ans_point, zoom))
             collision = true;
@@ -643,7 +659,7 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
     collision = false;
     int index_graph = -1;
     //Проверка пересечний мышки с графиком
-    for (int i = 0; i < std::size(vecGraph); i++)
+    for (int i = 0; i < vecGraph.size(); i++)
     {
         if ((vecGraph[i].check_collision2(mouseX, mouseY, ans_point, zoom)) && !vecGraph[i].get_select())
         {
@@ -678,7 +694,6 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 
 }
 
-
 void MainWindow::mini_map_draw(QPainter &painter)
 {
     float width_RP = ui->groupBox_right->width();
@@ -705,26 +720,26 @@ void MainWindow::mini_map_draw(QPainter &painter)
 
     //Находим крайние X графиков
     float maxX = -9999999;
-    for (int i = 0; i < std::size(vecGraph); i++)
+    for (int i = 0; i < vecGraph.size(); i++)
     {
-        float new_maxX = abs(vecGraph[i].get_minX());
+        float new_maxX = my_abs(vecGraph[i].get_minX());
         if (new_maxX > maxX)
             maxX = new_maxX;
 
-        new_maxX = abs(vecGraph[i].get_maxX());
+        new_maxX = my_abs(vecGraph[i].get_maxX());
         if (new_maxX > maxX)
             maxX = new_maxX;
     }
 
     //Находим крайние Y графиков
     float maxY = -99999;
-    for (int i = 0; i < std::size(vecGraph); i++)
+    for (int i = 0; i < vecGraph.size(); i++)
     {
-        float new_maxY = abs(vecGraph[i].get_minY());
+        float new_maxY = my_abs(vecGraph[i].get_minY());
         if (new_maxY > maxY)
             maxY = new_maxY;
 
-        new_maxY = abs(vecGraph[i].get_maxY());
+        new_maxY = my_abs(vecGraph[i].get_maxY());
         if (new_maxY > maxY)
             maxY = new_maxY;
     }
@@ -736,10 +751,9 @@ void MainWindow::mini_map_draw(QPainter &painter)
     if (zoomY < zoom_mm)
         zoom_mm = zoomY;
 
-
-    for (int j = 0; j < std::size(vecGraph); j++)
+    for (int j = 0; j < vecGraph.size(); j++)
        {
-           for (int i = 0; i < std::size(vecGraph[j].arr_points) - 1; i++)
+           for (int i = 0; i < vecGraph[j].arr_points.size() - 1; i++)
            {
                QLineF line(
                            (vecGraph[j].arr_points[i].x()) * zoom_mm,
@@ -774,12 +788,8 @@ void MainWindow::mini_map_draw(QPainter &painter)
     if (yy1 > height_RP/2)
         yy1 = height_RP/2;
 
-    painter.drawRect(xx1, yy2, abs(xx1-xx2), abs(yy1-yy2));
+    painter.drawRect(xx1, yy2, my_abs(xx1-xx2), my_abs(yy1-yy2));
 }
-
-
-
-
 
 //Событие: Перерисовка (При изменении окна + специальный вызвов repaint)
 void MainWindow::paintEvent(QPaintEvent *event)
@@ -842,9 +852,9 @@ void MainWindow::paintEvent(QPaintEvent *event)
 
     painter.setPen(Qt::blue);
     //Отрисовка графиков
-    for (int j = 0; j < std::size(vecGraph); j++)
+    for (int j = 0; j < vecGraph.size(); j++)
        {
-           for (int i = 0; i < std::size(vecGraph[j].arr_points) - 1; i++)
+           for (int i = 0; i < vecGraph[j].arr_points.size() - 1; i++)
            {
                QLineF line(
                            (vecGraph[j].arr_points[i].x() * zoom+ scrool_x),
@@ -891,7 +901,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
     font.setBold(QFont::Bold);
     painter.setFont(font);
 
-    painter.drawText(QPoint((myWidth*zoom/2) - frame_size_x - (std::size(titleAxisX) * 5.75) - 20, -15 + scrool_y), titleAxisX);
+    painter.drawText(QPoint((myWidth*zoom/2) - frame_size_x - (titleAxisX.size() * 5.75) - 20, -15 + scrool_y), titleAxisX);
     painter.drawText(QPoint(40 + scrool_x,(-myHeight*zoom/2) + 25 + frame_size_y), titleAxisY);
     //painter.drawText(point, "Y");
 
@@ -1071,8 +1081,8 @@ void MainWindow::on_pushButton_2_clicked()
     else{
         //Проверка на существующее имя
         bool repeat = false;
-        for (auto &i : vecGraph){
-            if (i.nameGraph == name)
+        for (int i = 0; i < vecGraph.size(); i++){
+            if (vecGraph[i].nameGraph == name)
                 repeat = true;
         }
         if (!repeat){
@@ -1133,9 +1143,9 @@ void MainWindow::onBtnClicked() {
             if (dialog.exec () == QDialog :: Accepted){
                 QColor newColor = dialog.sendColor();
                 //Меняем цвет графика
-                for (auto &i : vecGraph){
-                    if (i.nameGraph == e->text()){
-                        i.colorGraph = newColor;
+                for (int i = 0; i < vecGraph.size(); i++){
+                    if (vecGraph[i].nameGraph == e->text()){
+                        vecGraph[i].colorGraph = newColor;
                     }
                 }
                 btn->setFlat(true);
@@ -1155,16 +1165,16 @@ void MainWindow::onCheckBoxClicked(){
         if( QLabel* e = box->parent()->findChild< QLabel* >()) {
             if (box->checkState() == Qt::Checked){
                 //Активация графика
-                for (auto &i : vecGraph){
-                    if (i.nameGraph == e->text())
-                        i.show = true;
+                for (int i = 0; i < vecGraph.size(); i++){
+                    if (vecGraph[i].nameGraph == e->text())
+                        vecGraph[i].show = true;
                 }
             }
             if (box->checkState() == Qt::Unchecked){
                 //Деактивация графика
-                for (auto &i : vecGraph){
-                    if (i.nameGraph == e->text())
-                        i.show = false;
+                for (int i = 0; i < vecGraph.size(); i++){
+                    if (vecGraph[i].nameGraph == e->text())
+                        vecGraph[i].show = false;
                 }
             }
             update();
